@@ -77,7 +77,6 @@ GAME_HTML = """
             align-items: center;
             justify-content: flex-start;
             backdrop-filter: blur(1px);
-            transition: opacity 0.4s ease;
             padding: 20px 20px 40px 20px;
             margin: 0 auto;
         }
@@ -1008,7 +1007,6 @@ GAME_HTML = """
             gameOverFlag = false;
             gameContainer.style.display = 'none';
             startScreenDiv.style.display = 'flex';
-            startScreenDiv.style.opacity = '1';
             passwordInput.value = '';
             passwordError.style.display = 'none';
             keys.ArrowUp = false;
@@ -1143,15 +1141,11 @@ GAME_HTML = """
             if (password === "20082010") {
                 passwordError.style.display = "none";
                 generateStars();
-                startScreenDiv.style.opacity = '0';
-                setTimeout(() => {
-                    startScreenDiv.style.display = 'none';
-                    gameContainer.style.display = 'flex';
-                    launchGame();
-                    initTouchControls();
-                    // Ensure animation is running (it should already be running, but just in case)
-                    if (!animationId) animate();
-                }, 500);
+                startScreenDiv.style.display = 'none';
+                gameContainer.style.display = 'flex';
+                launchGame();
+                initTouchControls();
+                if (!animationId) animate();
             } else {
                 passwordError.style.display = "block";
                 passwordInput.value = "";
