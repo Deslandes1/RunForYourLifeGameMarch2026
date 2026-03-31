@@ -22,7 +22,7 @@ GAME_HTML = """
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Vilaj De Dye - Escape the Crossfire</title>
     <style>
         * {
@@ -30,6 +30,7 @@ GAME_HTML = """
             padding: 0;
             box-sizing: border-box;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -39,15 +40,16 @@ GAME_HTML = """
             justify-content: center;
             align-items: center;
             font-family: 'Courier New', 'Poppins', monospace;
-            padding: 20px;
+            padding: 12px;
         }
 
-        /* Game container and panels */
         .game-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 12px;
+            width: 100%;
+            max-width: 1000px;
         }
 
         canvas {
@@ -56,13 +58,16 @@ GAME_HTML = """
             border-radius: 28px;
             box-shadow: 0 20px 35px rgba(0, 0, 0, 0.6), inset 0 0 4px rgba(255, 255, 255, 0.1);
             cursor: none;
+            width: 100%;
+            height: auto;
+            background: #1f2a2e;
         }
 
-        /* Start screen overlay (first page: haitian flag + stars + info) */
+        /* Start screen (responsive) */
         .start-screen {
             position: relative;
-            width: 1000px;
-            height: 600px;
+            width: 100%;
+            max-width: 1000px;
             background: radial-gradient(circle at 30% 20%, #0b2b3b, #01050e);
             border-radius: 28px;
             box-shadow: 0 20px 35px rgba(0, 0, 0, 0.6);
@@ -72,14 +77,16 @@ GAME_HTML = """
             justify-content: center;
             backdrop-filter: blur(1px);
             transition: opacity 0.4s ease;
-            overflow-y: auto;
             padding: 20px;
+            margin: 0 auto;
         }
 
         .flag-container {
             position: relative;
-            width: 360px;
-            height: 200px;
+            width: 80%;
+            max-width: 360px;
+            height: auto;
+            aspect-ratio: 360 / 200;
             margin-bottom: 20px;
             animation: floatFlag 2.8s infinite ease-in-out;
             filter: drop-shadow(0 10px 12px rgba(0,0,0,0.5));
@@ -128,23 +135,24 @@ GAME_HTML = """
             background: rgba(0,0,0,0.75);
             backdrop-filter: blur(4px);
             border-radius: 24px;
-            padding: 15px 25px;
+            padding: 15px 20px;
             margin: 10px 0;
-            width: 85%;
+            width: 95%;
+            max-width: 500px;
             text-align: center;
             color: #ffefb9;
             border: 1px solid gold;
         }
 
         .info-panel-start h2 {
-            font-size: 28px;
+            font-size: clamp(20px, 6vw, 28px);
             margin-bottom: 8px;
             color: #f5e56b;
         }
 
         .info-panel-start p {
             margin: 6px 0;
-            font-size: 14px;
+            font-size: clamp(11px, 3.5vw, 14px);
         }
 
         .price-tag {
@@ -158,13 +166,14 @@ GAME_HTML = """
 
         .password-area {
             margin: 15px 0;
-            width: 280px;
+            width: 90%;
+            max-width: 280px;
             text-align: center;
         }
 
         .password-area input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             font-size: 16px;
             border-radius: 40px;
             border: 2px solid gold;
@@ -194,9 +203,9 @@ GAME_HTML = """
             margin-top: 20px;
             background: #d62c1e;
             border: none;
-            font-size: 28px;
+            font-size: clamp(20px, 6vw, 28px);
             font-weight: bold;
-            padding: 12px 36px;
+            padding: 12px 24px;
             border-radius: 60px;
             color: #ffefb9;
             font-family: monospace;
@@ -215,35 +224,90 @@ GAME_HTML = """
             display: none;
             flex-direction: column;
             align-items: center;
+            width: 100%;
         }
 
         .info-panel {
-            width: 1000px;
+            width: 100%;
             background: #0f0e17cc;
             backdrop-filter: blur(8px);
             border-radius: 40px;
-            padding: 8px 20px;
+            padding: 8px 16px;
             display: flex;
             justify-content: space-between;
             color: #f7d44a;
             font-weight: bold;
-            font-size: 18px;
+            font-size: clamp(12px, 4vw, 18px);
             margin-bottom: 12px;
             border: 1px solid #ffcd7e;
         }
 
         .controls-hint {
             background: #00000099;
-            padding: 4px 12px;
+            padding: 6px 12px;
             border-radius: 28px;
-            font-size: 14px;
+            font-size: clamp(10px, 3vw, 14px);
+            text-align: center;
+        }
+
+        /* Touch controls container */
+        .touch-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .touch-btn {
+            background: rgba(0,0,0,0.7);
+            border: 2px solid gold;
+            color: gold;
+            font-size: 28px;
+            font-weight: bold;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            transition: 0.05s linear;
+        }
+
+        .touch-btn:active {
+            transform: scale(0.92);
+            background: rgba(255,215,0,0.3);
+        }
+
+        .run-btn {
+            background: #d62c1e;
+            border-color: #ffaa66;
+            color: white;
+            font-size: 18px;
+            width: 80px;
+            border-radius: 40px;
+        }
+
+        @media (max-width: 600px) {
+            .touch-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+            .run-btn {
+                width: 70px;
+                font-size: 16px;
+            }
         }
 
         button {
             background: #2c2e3a;
             border: none;
             color: white;
-            padding: 4px 14px;
+            padding: 6px 14px;
             border-radius: 30px;
             cursor: pointer;
             font-weight: bold;
@@ -279,17 +343,16 @@ GAME_HTML = """
             <p style="font-size:12px; margin-top:10px;">© 2026 GlobalInternet.py – All rights reserved</p>
         </div>
 
-        <!-- Password unlock area -->
         <div class="password-area">
             <input type="password" id="unlockPassword" placeholder="Enter password to unlock" autocomplete="off">
             <div id="passwordError" class="error-msg" style="display: none;">Wrong password. Try again.</div>
         </div>
 
         <button class="start-btn" id="startGameBtn">🔓 JWE (PLAY) 🔓</button>
-        <div class="sub" style="font-size:12px; margin-top:12px;">⚡ Arrow keys • Hold SHIFT to run ⚡</div>
+        <div class="sub" style="font-size:12px; margin-top:12px;">⚡ Arrow keys / Touch buttons • Hold SHIFT/RUN to sprint ⚡</div>
     </div>
 
-    <!-- GAME INTERFACE (unchanged) -->
+    <!-- GAME INTERFACE -->
     <div id="gameContainer" class="game-area">
         <div class="info-panel">
             <span>🔥 VILAJ DE DYE 🔥</span>
@@ -298,7 +361,15 @@ GAME_HTML = """
             <button id="resetGameBtn">RESTART</button>
         </div>
         <canvas id="gameCanvas" width="1000" height="600"></canvas>
-        <div class="controls-hint">🎮 ARROWS = move | SHIFT = RUN faster | Avoid BULLETS! 🎮</div>
+        <!-- Touch controls -->
+        <div class="touch-controls">
+            <div class="touch-btn" data-key="ArrowUp">▲</div>
+            <div class="touch-btn" data-key="ArrowLeft">◀</div>
+            <div class="touch-btn" data-key="ArrowDown">▼</div>
+            <div class="touch-btn" data-key="ArrowRight">▶</div>
+            <div class="touch-btn run-btn" data-key="Shift">🏃 RUN</div>
+        </div>
+        <div class="controls-hint">🎮 ARROWS = move | SHIFT = RUN | Avoid BULLETS! 🎮</div>
     </div>
 </div>
 
@@ -750,7 +821,55 @@ GAME_HTML = """
             statusSpan.style.color = "#f7d44a";
         }
         
-        function initInput() {
+        // Touch control simulation
+        function simulateKey(key, isDown) {
+            if (key === 'Shift') {
+                keys.shift = isDown;
+            } else if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
+                keys[key] = isDown;
+            }
+            // Prevent default scrolling on touch devices
+            if (isDown) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+        
+        function initTouchControls() {
+            const touchButtons = document.querySelectorAll('.touch-btn');
+            touchButtons.forEach(btn => {
+                const key = btn.getAttribute('data-key');
+                if (!key) return;
+                
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    simulateKey(key, true);
+                });
+                btn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    simulateKey(key, false);
+                });
+                btn.addEventListener('touchcancel', (e) => {
+                    e.preventDefault();
+                    simulateKey(key, false);
+                });
+                // Mouse events for debugging on desktop
+                btn.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    simulateKey(key, true);
+                });
+                btn.addEventListener('mouseup', (e) => {
+                    e.preventDefault();
+                    simulateKey(key, false);
+                });
+                btn.addEventListener('mouseleave', (e) => {
+                    simulateKey(key, false);
+                });
+            });
+        }
+        
+        function initKeyboard() {
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                     e.preventDefault();
@@ -797,11 +916,10 @@ GAME_HTML = """
             }
         }
         
-        // Modified start button: check password before launching game
+        // Password check
         startBtn.addEventListener('click', () => {
             const password = passwordInput.value;
             if (password === "20082010") {
-                // Correct password
                 passwordError.style.display = "none";
                 generateStars();
                 startScreenDiv.style.opacity = '0';
@@ -810,9 +928,9 @@ GAME_HTML = """
                     gameContainer.style.display = 'flex';
                     launchGame();
                     if(!animationId) animate();
+                    initTouchControls(); // ensure touch controls are active after game start
                 }, 400);
             } else {
-                // Wrong password
                 passwordError.style.display = "block";
                 passwordInput.value = "";
                 passwordInput.focus();
@@ -836,7 +954,7 @@ GAME_HTML = """
         });
         
         generateStars();
-        initInput();
+        initKeyboard();
         animate();
     })();
 </script>
@@ -852,7 +970,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.components.v1.html(GAME_HTML, height=680, scrolling=False)
+st.components.v1.html(GAME_HTML, height=720, scrolling=False)
 
 st.markdown("</div></div>", unsafe_allow_html=True)
 
@@ -860,9 +978,9 @@ st.markdown(
     """
     ---
     ### 🎮 Game Controls
-    - **Arrow keys** – move the father (the three sons follow).
-    - **Hold SHIFT** – run faster to dodge bullets.
-    - **Goal** – bring the whole family into the **green Safe Haven** on the right side of the screen.
+    - **Keyboard:** Arrow keys to move, SHIFT to run.
+    - **Touch:** Tap the on‑screen buttons (▲◀▼▶) to move, and tap **RUN** to sprint.
+    - **Goal:** Bring the whole family into the green **Safe Haven** on the right side of the screen.
     - Avoid bullets fired by bandits and police. One hit means Game Over.
     """
 )
