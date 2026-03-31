@@ -319,26 +319,6 @@ GAME_HTML = """
                 font-size: 16px;
             }
         }
-
-        .lang-selector {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 10px;
-        }
-        .lang-btn {
-            background: #2c2e3a;
-            border: none;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .lang-btn.active {
-            background: #ff7b2c;
-            box-shadow: 0 0 5px gold;
-        }
     </style>
 </head>
 <body>
@@ -350,12 +330,12 @@ GAME_HTML = """
             <div class="stars-field" id="starsField"></div>
         </div>
 
-        <div id="startInfoPanel" class="info-panel-start">
+        <div class="info-panel-start">
             <h2>🔥 VILAJ DE DYE 🔥</h2>
             <p><strong>"Papa ak Twa Pitit Gason" — Escape the nightmare</strong></p>
         </div>
 
-        <div id="companyInfoPanel" class="info-panel-start">
+        <div class="info-panel-start">
             <p>🎮 <strong>Python Code Builder:</strong> Gesner Deslandes</p>
             <p>🏢 <strong>Company:</strong> GlobalInternet.py</p>
             <p>👨‍💻 <strong>Owner & Developer:</strong> Gesner Deslandes</p>
@@ -371,13 +351,6 @@ GAME_HTML = """
             <div id="passwordError" class="error-msg" style="display: none;">Wrong password. Try again.</div>
         </div>
 
-        <div class="lang-selector" id="startLangSelector">
-            <button class="lang-btn" data-lang="en">🇺🇸 English</button>
-            <button class="lang-btn" data-lang="ht">🇭🇹 Kreyòl</button>
-            <button class="lang-btn" data-lang="es">🇪🇸 Español</button>
-            <button class="lang-btn" data-lang="fr">🇫🇷 Français</button>
-        </div>
-
         <button class="start-btn" id="startGameBtn">🔓 JWE (PLAY) 🔓</button>
         <div class="sub" style="font-size:12px; margin-top:12px;">⚡ Arrow keys / Touch buttons • Hold SHIFT/RUN to sprint ⚡</div>
     </div>
@@ -385,8 +358,8 @@ GAME_HTML = """
     <!-- GAME INTERFACE -->
     <div id="gameContainer" class="game-area">
         <div class="info-panel">
-            <span id="gameTitleSpan">🔥 VILAJ DE DYE 🔥</span>
-            <span id="safeRefugeSpan">🏠 SAFE REFUGE → right side</span>
+            <span>🔥 VILAJ DE DYE 🔥</span>
+            <span>🏠 SAFE REFUGE → right side</span>
             <span id="gameStatusMsg">⚔️ ESCAPE ⚔️</span>
             <div style="display: flex; gap: 8px;">
                 <button id="fullscreenBtn">⛶ FULLSCREEN</button>
@@ -402,13 +375,7 @@ GAME_HTML = """
             <div class="touch-btn" data-key="ArrowRight">▶</div>
             <div class="touch-btn run-btn" data-key="Shift">🏃 RUN</div>
         </div>
-        <div class="controls-hint" id="controlsHint">🎮 ARROWS = move | SHIFT = RUN | Avoid BULLETS! 🎮</div>
-        <div class="lang-selector" id="gameLangSelector">
-            <button class="lang-btn" data-lang="en">🇺🇸 English</button>
-            <button class="lang-btn" data-lang="ht">🇭🇹 Kreyòl</button>
-            <button class="lang-btn" data-lang="es">🇪🇸 Español</button>
-            <button class="lang-btn" data-lang="fr">🇫🇷 Français</button>
-        </div>
+        <div class="controls-hint">🎮 ARROWS = move | SHIFT = RUN | Avoid BULLETS! 🎮</div>
     </div>
 </div>
 
@@ -426,139 +393,6 @@ GAME_HTML = """
         const statusSpan = document.getElementById('gameStatusMsg');
         const passwordInput = document.getElementById('unlockPassword');
         const passwordError = document.getElementById('passwordError');
-        const startInfoPanel = document.getElementById('startInfoPanel');
-        const gameTitleSpan = document.getElementById('gameTitleSpan');
-        const safeRefugeSpan = document.getElementById('safeRefugeSpan');
-        const controlsHintSpan = document.getElementById('controlsHint');
-
-        // ---------- Language translations ----------
-        const translations = {
-            en: {
-                startTitle: "🔥 VILAJ DE DYE 🔥",
-                startSub: "\"Papa ak Twa Pitit Gason\" — Escape the nightmare",
-                gameTitle: "🔥 VILAJ DE DYE 🔥",
-                safeRefuge: "🏠 SAFE REFUGE → right side",
-                controlsHint: "🎮 ARROWS = move | SHIFT = RUN | Avoid BULLETS! 🎮",
-                statusEscape: "⚔️ ESCAPE ⚔️",
-                statusVictory: "🌟 VICTORY! SAFE REFUGE 🌟",
-                statusGameOver: "💀 GAME OVER... Hit by bullet 💀",
-                statusRunning: "🏃‍♂️ ESCAPE! AVOID BULLETS 🏃‍♂️",
-                safeZoneText: "🏠 SAFE HAVEN 🏠",
-                libertyText: "LIBETE",
-                graffiti1: "LARI KOZE",
-                graffiti2: "CHAPO!",
-                passwordPlaceholder: "Enter password to unlock",
-                passwordError: "Wrong password. Try again.",
-                startButton: "🔓 JWE (PLAY) 🔓"
-            },
-            ht: {
-                startTitle: "🔥 VILAJ DE DYE 🔥",
-                startSub: "\"Papa ak Twa Pitit Gason\" — Chape anba lanfè",
-                gameTitle: "🔥 VILAJ DE DYE 🔥",
-                safeRefuge: "🏠 REFUJ SÒT → bò dwat",
-                controlsHint: "🎮 FLÈCH = deplase | SHIFT = kouri | Evite BAL! 🎮",
-                statusEscape: "⚔️ CHAPE ⚔️",
-                statusVictory: "🌟 VIKTWA! REFUJ SÒT 🌟",
-                statusGameOver: "💀 FINI... Bal frape w 💀",
-                statusRunning: "🏃‍♂️ CHAPE! EVITE BAL 🏃‍♂️",
-                safeZoneText: "🏠 ZON SÒT 🏠",
-                libertyText: "LIBETE",
-                graffiti1: "LARI KOZE",
-                graffiti2: "CHAPO!",
-                passwordPlaceholder: "Antre modpas pou ouvri",
-                passwordError: "Modpas mal. Eseye ankò.",
-                startButton: "🔓 JWE 🔓"
-            },
-            es: {
-                startTitle: "🔥 VILAJ DE DYE 🔥",
-                startSub: "\"Papa ak Twa Pitit Gason\" — Escapa de la pesadilla",
-                gameTitle: "🔥 VILAJ DE DYE 🔥",
-                safeRefuge: "🏠 REFUGIO → lado derecho",
-                controlsHint: "🎮 FLECHAS = mover | SHIFT = correr | Evita BALAS! 🎮",
-                statusEscape: "⚔️ ESCAPA ⚔️",
-                statusVictory: "🌟 VICTORIA! REFUGIO 🌟",
-                statusGameOver: "💀 GAME OVER... Golpe de bala 💀",
-                statusRunning: "🏃‍♂️ ESCAPA! EVITA BALAS 🏃‍♂️",
-                safeZoneText: "🏠 ZONA SEGURA 🏠",
-                libertyText: "LIBERTAD",
-                graffiti1: "LARI KOZE",
-                graffiti2: "CHAPO!",
-                passwordPlaceholder: "Ingresa contraseña",
-                passwordError: "Contraseña incorrecta. Intenta de nuevo.",
-                startButton: "🔓 JUGAR 🔓"
-            },
-            fr: {
-                startTitle: "🔥 VILAJ DE DYE 🔥",
-                startSub: "\"Papa ak Twa Pitit Gason\" — Échappe au cauchemar",
-                gameTitle: "🔥 VILAJ DE DYE 🔥",
-                safeRefuge: "🏠 REFUGE SÛR → côté droit",
-                controlsHint: "🎮 FLÈCHES = déplacer | SHIFT = courir | Évite les BALLES! 🎮",
-                statusEscape: "⚔️ ÉVASION ⚔️",
-                statusVictory: "🌟 VICTOIRE! REFUGE SÛR 🌟",
-                statusGameOver: "💀 GAME OVER... Touché par balle 💀",
-                statusRunning: "🏃‍♂️ ÉVADE-TOI! ÉVITE LES BALLES 🏃‍♂️",
-                safeZoneText: "🏠 ZONE SÛRE 🏠",
-                libertyText: "LIBERTÉ",
-                graffiti1: "LARI KOZE",
-                graffiti2: "CHAPO!",
-                passwordPlaceholder: "Entrez le mot de passe",
-                passwordError: "Mot de passe incorrect. Réessayez.",
-                startButton: "🔓 JOUER 🔓"
-            }
-        };
-
-        let currentLang = 'en';
-
-        // Update all UI texts based on current language
-        function updateLanguage() {
-            const t = translations[currentLang];
-
-            // Start screen texts
-            startInfoPanel.innerHTML = `<h2>${t.startTitle}</h2><p><strong>${t.startSub}</strong></p>`;
-            // Password placeholder
-            passwordInput.placeholder = t.passwordPlaceholder;
-            passwordError.innerText = t.passwordError;
-            startBtn.innerText = t.startButton;
-
-            // Game panel texts (only if game container is visible)
-            if (gameContainer.style.display === 'flex') {
-                gameTitleSpan.innerText = t.gameTitle;
-                safeRefugeSpan.innerText = t.safeRefuge;
-                controlsHintSpan.innerText = t.controlsHint;
-                
-                // Update current status based on game state
-                if (gameActive && !gameWin && !gameOverFlag) {
-                    statusSpan.innerText = t.statusRunning;
-                } else if (gameWin) {
-                    statusSpan.innerText = t.statusVictory;
-                } else if (gameOverFlag) {
-                    statusSpan.innerText = t.statusGameOver;
-                } else {
-                    statusSpan.innerText = t.statusEscape;
-                }
-            }
-        }
-
-        // Language selector event handlers
-        function initLanguageSelectors() {
-            const langBtns = document.querySelectorAll('.lang-btn');
-            langBtns.forEach(btn => {
-                btn.removeEventListener('click', handleLangClick);
-                btn.addEventListener('click', handleLangClick);
-            });
-        }
-
-        function handleLangClick(e) {
-            const btn = e.currentTarget;
-            const lang = btn.getAttribute('data-lang');
-            if (lang && translations[lang]) {
-                currentLang = lang;
-                updateLanguage();
-                // Highlight active button in both selectors
-                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll(`.lang-btn[data-lang="${lang}"]`).forEach(b => b.classList.add('active'));
-            }
-        }
 
         // ---------- Game constants ----------
         const W = 1000, H = 600;
@@ -694,7 +528,7 @@ GAME_HTML = """
             gameActive = true;
             gameWin = false;
             gameOverFlag = false;
-            statusSpan.innerText = translations[currentLang].statusRunning;
+            statusSpan.innerText = "🏃‍♂️ ESCAPE! AVOID BULLETS 🏃‍♂️";
             statusSpan.style.color = "#f7d44a";
             father.x = 90;
             father.y = H/2;
@@ -807,7 +641,7 @@ GAME_HTML = """
             if (fatherSafe && sonsSafe && gameActive) {
                 gameActive = false;
                 gameWin = true;
-                statusSpan.innerText = translations[currentLang].statusVictory;
+                statusSpan.innerText = "🌟 VICTORY! SAFE REFUGE 🌟";
                 statusSpan.style.color = "#adff2f";
                 stopTerrorSoundtrack();
                 return true;
@@ -819,12 +653,12 @@ GAME_HTML = """
             if (!gameActive) return;
             gameActive = false;
             gameOverFlag = true;
-            statusSpan.innerText = translations[currentLang].statusGameOver;
+            statusSpan.innerText = "💀 GAME OVER... Hit by bullet 💀";
             statusSpan.style.color = "#ff5555";
             stopTerrorSoundtrack();
         }
         
-        // Drawing functions (updated to use current language)
+        // Drawing functions
         function drawBackgroundGhetto() {
             ctx.fillStyle = "#1f2a2e";
             ctx.fillRect(0,0,W,H);
@@ -845,9 +679,9 @@ GAME_HTML = """
             for(let i=0;i<12;i++) ctx.beginPath(), ctx.arc(70+i*100, H-100, 8,0,Math.PI*2), ctx.fill();
             ctx.font = "bold 20px monospace";
             ctx.fillStyle = "#9e7b5c66";
-            ctx.fillText(translations[currentLang].graffiti1, 500, 350);
+            ctx.fillText("LARI KOZE", 500, 350);
             ctx.fillStyle = "#c98f5e66";
-            ctx.fillText(translations[currentLang].graffiti2, 760, 520);
+            ctx.fillText("CHAPO!", 760, 520);
         }
         
         function drawEnemies() {
@@ -934,10 +768,10 @@ GAME_HTML = """
             ctx.fillRect(SAFE_ZONE_X-5, SAFE_ZONE_Y_MIN-10, W-SAFE_ZONE_X+10, SAFE_ZONE_Y_MAX-SAFE_ZONE_Y_MIN+20);
             ctx.fillStyle = "#edc531";
             ctx.font = "bold 20px monospace";
-            ctx.fillText(translations[currentLang].safeZoneText, SAFE_ZONE_X+15, SAFE_ZONE_Y_MIN+35);
+            ctx.fillText("🏠 SAFE HAVEN 🏠", SAFE_ZONE_X+15, SAFE_ZONE_Y_MIN+35);
             ctx.fillStyle = "#ffe5a3";
             ctx.font = "italic 14px monospace";
-            ctx.fillText(translations[currentLang].libertyText, SAFE_ZONE_X+55, SAFE_ZONE_Y_MAX-15);
+            ctx.fillText("LIBETE", SAFE_ZONE_X+55, SAFE_ZONE_Y_MAX-15);
         }
         
         function drawHUD() {
@@ -991,12 +825,8 @@ GAME_HTML = """
             } else {
                 startTerrorSoundtrack();
             }
-            statusSpan.innerText = translations[currentLang].statusRunning;
+            statusSpan.innerText = "🏃‍♂️ ESCAPE! AVOID BULLETS 🏃‍♂️";
             statusSpan.style.color = "#f7d44a";
-            // Ensure game panel texts are updated with current language
-            gameTitleSpan.innerText = translations[currentLang].gameTitle;
-            safeRefugeSpan.innerText = translations[currentLang].safeRefuge;
-            controlsHintSpan.innerText = translations[currentLang].controlsHint;
         }
         
         function logout() {
@@ -1015,8 +845,6 @@ GAME_HTML = """
             keys.ArrowRight = false;
             keys.shift = false;
             generateStars();
-            // Re-apply current language to start screen
-            updateLanguage();
         }
         
         // Touch and keyboard controls
@@ -1138,7 +966,6 @@ GAME_HTML = """
         // Password check
         startBtn.addEventListener('click', () => {
             const password = passwordInput.value.trim();
-            console.log("Password entered:", password);
             if (password === "20082010") {
                 passwordError.style.display = "none";
                 generateStars();
@@ -1176,13 +1003,7 @@ GAME_HTML = """
         
         generateStars();
         initKeyboard();
-        initLanguageSelectors();
-        // Set default active button (English)
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            if (btn.getAttribute('data-lang') === 'en') btn.classList.add('active');
-        });
-        updateLanguage(); // apply initial language
-        animate(); // start the animation loop
+        animate();
     })();
 </script>
 </body>
