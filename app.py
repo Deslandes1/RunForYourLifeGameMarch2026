@@ -156,6 +156,40 @@ GAME_HTML = """
             margin-top: 8px;
         }
 
+        .password-area {
+            margin: 15px 0;
+            width: 280px;
+            text-align: center;
+        }
+
+        .password-area input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 40px;
+            border: 2px solid gold;
+            background: rgba(0,0,0,0.7);
+            color: #ffefb9;
+            text-align: center;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .password-area input:focus {
+            outline: none;
+            border-color: #ffaa33;
+        }
+
+        .error-msg {
+            color: #ff8888;
+            font-size: 12px;
+            margin-top: 5px;
+            background: rgba(0,0,0,0.5);
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+
         .start-btn {
             margin-top: 20px;
             background: #d62c1e;
@@ -222,7 +256,7 @@ GAME_HTML = """
 </head>
 <body>
 <div class="game-wrapper">
-    <!-- FIRST PAGE: HAITIAN FLAG + ALL YOUR INFO -->
+    <!-- FIRST PAGE: HAITIAN FLAG + INFO + PASSWORD -->
     <div id="startScreen" class="start-screen">
         <div class="flag-container">
             <div class="haitian-flag"></div>
@@ -245,7 +279,13 @@ GAME_HTML = """
             <p style="font-size:12px; margin-top:10px;">© 2026 GlobalInternet.py – All rights reserved</p>
         </div>
 
-        <button class="start-btn" id="startGameBtn">🎮 JWE (PLAY) 🎮</button>
+        <!-- Password unlock area -->
+        <div class="password-area">
+            <input type="password" id="unlockPassword" placeholder="Enter password to unlock" autocomplete="off">
+            <div id="passwordError" class="error-msg" style="display: none;">Wrong password. Try again.</div>
+        </div>
+
+        <button class="start-btn" id="startGameBtn">🔓 JWE (PLAY) 🔓</button>
         <div class="sub" style="font-size:12px; margin-top:12px;">⚡ Arrow keys • Hold SHIFT to run ⚡</div>
     </div>
 
@@ -272,6 +312,8 @@ GAME_HTML = """
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const statusSpan = document.getElementById('gameStatusMsg');
+        const passwordInput = document.getElementById('unlockPassword');
+        const passwordError = document.getElementById('passwordError');
 
         // ---------- Game constants ----------
         const W = 1000, H = 600;
@@ -755,15 +797,26 @@ GAME_HTML = """
             }
         }
         
+        // Modified start button: check password before launching game
         startBtn.addEventListener('click', () => {
-            generateStars();
-            startScreenDiv.style.opacity = '0';
-            setTimeout(() => {
-                startScreenDiv.style.display = 'none';
-                gameContainer.style.display = 'flex';
-                launchGame();
-                if(!animationId) animate();
-            }, 400);
+            const password = passwordInput.value;
+            if (password === "20082010") {
+                // Correct password
+                passwordError.style.display = "none";
+                generateStars();
+                startScreenDiv.style.opacity = '0';
+                setTimeout(() => {
+                    startScreenDiv.style.display = 'none';
+                    gameContainer.style.display = 'flex';
+                    launchGame();
+                    if(!animationId) animate();
+                }, 400);
+            } else {
+                // Wrong password
+                passwordError.style.display = "block";
+                passwordInput.value = "";
+                passwordInput.focus();
+            }
         });
         
         resetBtn.addEventListener('click', () => {
