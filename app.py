@@ -412,6 +412,7 @@ GAME_HTML = """
         let gameWin = false;
         let gameOverFlag = false;
         let animationId = null;
+        let autoRestartTimeout = null;
         
         let father = { x: 90, y: H/2, radius: FATHER_RADIUS };
         let sons = [
@@ -546,7 +547,6 @@ GAME_HTML = """
                 osc.start();
                 osc.stop(now + 1.5);
                 
-                // add a second lower note
                 const osc2 = audioCtx.createOscillator();
                 osc2.type = 'sine';
                 osc2.frequency.value = 440;
@@ -561,14 +561,13 @@ GAME_HTML = """
             celebrationActive = true;
             victoryBuzzerPlayed = false;
             playVictoryBuzzer();
-            // Create 50 balloons
             balloons = [];
             for (let i = 0; i < 50; i++) {
                 balloons.push({
                     x: Math.random() * W,
                     y: H + Math.random() * 100,
                     radius: 10 + Math.random() * 15,
-                    color: Math.random() > 0.5 ? "#00209f" : "#d21034", // blue or red
+                    color: Math.random() > 0.5 ? "#00209f" : "#d21034",
                     speed: 1 + Math.random() * 2,
                     angle: Math.random() * Math.PI * 2
                 });
@@ -590,9 +589,7 @@ GAME_HTML = """
                 ctx.fillStyle = "gold";
                 ctx.font = `${b.radius}px monospace`;
                 ctx.fillText("🎈", b.x - b.radius/2, b.y - b.radius/2);
-                // move up
                 b.y -= b.speed;
-                // reset if out of top
                 if (b.y + b.radius < 0) {
                     b.y = H + b.radius;
                     b.x = Math.random() * W;
@@ -618,6 +615,8 @@ GAME_HTML = """
                 e.cooldown = Math.floor(Math.random() * 30);
             }
             currentSpeed = WALK_SPEED;
+            if (autoRestartTimeout) clearTimeout(autoRestartTimeout);
+            autoRestartTimeout = null;
         }
         
         function updateSonsPosition(forceDirect=false) {
@@ -659,16 +658,14 @@ GAME_HTML = """
             return false;
         }
         
-        // Enemies shoot at each other, not at player
+        // Enemies shoot at each other
         function enemyShoot(enemy) {
             if (!gameActive || gameWin) return;
-            // Find a random enemy that is not this one
             const otherEnemies = enemies.filter(e => e !== enemy);
             if (otherEnemies.length === 0) return;
             const target = otherEnemies[Math.floor(Math.random() * otherEnemies.length)];
-            // aim at target's position
             let angle = Math.atan2(target.y - enemy.y, target.x - enemy.x);
-            angle += (Math.random() - 0.5) * 0.3; // slight spread
+            angle += (Math.random() - 0.5) * 0.3;
             const speed = 5.2;
             const vx = Math.cos(angle) * speed;
             const vy = Math.sin(angle) * speed;
@@ -740,14 +737,31 @@ GAME_HTML = """
             if (!gameActive) return;
             gameActive = false;
             gameOverFlag = true;
-            statusSpan.innerText = "💀 GAME OVER... Hit by bullet 💀";
+            statusSpan.innerText = "💀 GAME OVER... Restarting 💀";
             statusSpan.style.color = "#ff5555";
             stopTerrorSoundtrack();
             celebrationActive = false;
             if (celebrationTimer) clearTimeout(celebrationTimer);
+            if (autoRestartTimeout) clearTimeout(autoRestartTimeout);
+            autoRestartTimeout = setTimeout(() => {
+                // Reset the game
+                fullGameReset();
+                // Restart sound
+                soundAllowed = true;
+                if (audioCtx) {
+                    audioCtx.resume().then(() => {
+                        startTerrorSoundtrack();
+                    }).catch(()=>{});
+                } else {
+                    startTerrorSoundtrack();
+                }
+                statusSpan.innerText = "🏃‍♂️ ESCAPE! AVOID BULLETS 🏃‍♂️";
+                statusSpan.style.color = "#f7d44a";
+                autoRestartTimeout = null;
+            }, 2000);
         }
         
-        // Drawing functions (unchanged but add celebration draw)
+        // Drawing functions
         function drawBackgroundGhetto() {
             ctx.fillStyle = "#1f2a2e";
             ctx.fillRect(0,0,W,H);
@@ -927,6 +941,8 @@ GAME_HTML = """
             gameOverFlag = false;
             celebrationActive = false;
             if (celebrationTimer) clearTimeout(celebrationTimer);
+            if (autoRestartTimeout) clearTimeout(autoRestartTimeout);
+            autoRestartTimeout = null;
             gameContainer.style.display = 'none';
             startScreenDiv.style.display = 'flex';
             passwordInput.value = '';
@@ -939,7 +955,7 @@ GAME_HTML = """
             generateStars();
         }
         
-        // Touch and keyboard controls (unchanged)
+        // Touch and keyboard controls
         function simulateKey(key, isDown) {
             if (key === 'Shift') {
                 keys.shift = isDown;
@@ -996,13 +1012,17 @@ GAME_HTML = """
                 }
                 if (e.key === 'r' || e.key === 'R') {
                     if (gameContainer.style.display === 'flex' && (!gameActive || gameWin || gameOverFlag)) {
+                        // manual restart – cancel auto restart and reset
+                        if (autoRestartTimeout) clearTimeout(autoRestartTimeout);
                         fullGameReset();
-                        if(gameWin || gameOverFlag){
-                            gameActive = true;
-                            gameWin=false; gameOverFlag=false;
-                            stopTerrorSoundtrack();
-                            startTerrorSoundtrack();
-                        }
+                        gameActive = true;
+                        gameWin = false;
+                        gameOverFlag = false;
+                        stopTerrorSoundtrack();
+                        startTerrorSoundtrack();
+                        bullets = [];
+                        for(let e of enemies) e.cooldown = 5;
+                        updateSonsPosition(true);
                     }
                 }
             });
@@ -1075,14 +1095,13 @@ GAME_HTML = """
         
         resetBtn.addEventListener('click', () => {
             if (gameContainer.style.display === 'flex') {
+                if (autoRestartTimeout) clearTimeout(autoRestartTimeout);
                 fullGameReset();
-                if(gameWin || gameOverFlag) {
-                    gameActive = true;
-                    gameWin = false;
-                    gameOverFlag = false;
-                    stopTerrorSoundtrack();
-                    startTerrorSoundtrack();
-                }
+                gameActive = true;
+                gameWin = false;
+                gameOverFlag = false;
+                stopTerrorSoundtrack();
+                startTerrorSoundtrack();
                 bullets = [];
                 for(let e of enemies) e.cooldown = 5;
                 updateSonsPosition(true);
@@ -1121,6 +1140,6 @@ st.markdown(
     - **Keyboard:** Arrow keys to move, SHIFT to run.
     - **Touch:** Tap the on‑screen buttons (▲◀▼▶) to move, and tap **RUN** to sprint.
     - **Goal:** Bring the whole family into the green **Safe Haven** on the right side of the screen.
-    - Avoid bullets fired by bandits and police. One hit means Game Over.
+    - Avoid bullets fired by bandits and police. One hit ends the round, and the game automatically restarts.
     """
 )
