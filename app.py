@@ -37,7 +37,7 @@ GAME_HTML = """
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-start;  /* changed from center to allow scrolling from top */
+            align-items: flex-start;
             font-family: 'Courier New', 'Poppins', monospace;
             padding: 12px;
         }
@@ -227,7 +227,7 @@ GAME_HTML = """
             flex-direction: column;
             align-items: center;
             width: 100%;
-            margin-bottom: 20px;  /* extra space at bottom */
+            margin-bottom: 20px;
         }
 
         .info-panel {
@@ -243,6 +243,22 @@ GAME_HTML = """
             font-size: clamp(12px, 4vw, 18px);
             margin-bottom: 12px;
             border: 1px solid #ffcd7e;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .info-panel button {
+            background: #2c2e3a;
+            border: none;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .info-panel button:hover {
+            background: #ff7b2c;
         }
 
         .controls-hint {
@@ -305,20 +321,6 @@ GAME_HTML = """
                 font-size: 16px;
             }
         }
-
-        button {
-            background: #2c2e3a;
-            border: none;
-            color: white;
-            padding: 6px 14px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        button:hover {
-            background: #ff7b2c;
-        }
     </style>
 </head>
 <body>
@@ -362,6 +364,7 @@ GAME_HTML = """
             <span>🏠 SAFE REFUGE → right side</span>
             <span id="gameStatusMsg">⚔️ ESCAPE ⚔️</span>
             <div style="display: flex; gap: 8px;">
+                <button id="fullscreenBtn">⛶ FULLSCREEN</button>
                 <button id="resetGameBtn">RESTART</button>
                 <button id="logoutBtn">LOGOUT</button>
             </div>
@@ -386,6 +389,7 @@ GAME_HTML = """
         const startBtn = document.getElementById('startGameBtn');
         const resetBtn = document.getElementById('resetGameBtn');
         const logoutBtn = document.getElementById('logoutBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const statusSpan = document.getElementById('gameStatusMsg');
@@ -938,6 +942,32 @@ GAME_HTML = """
             }
         }
         
+        // Fullscreen toggle
+        function toggleFullscreen() {
+            const elem = document.documentElement; // entire page
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().catch(err => {
+                    console.warn(`Fullscreen error: ${err.message}`);
+                });
+                fullscreenBtn.textContent = "✖ EXIT";
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.textContent = "⛶ FULLSCREEN";
+            }
+        }
+        
+        // Update button text when fullscreen changes (e.g., ESC key)
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fullscreenBtn.textContent = "✖ EXIT";
+            } else {
+                fullscreenBtn.textContent = "⛶ FULLSCREEN";
+            }
+        });
+        
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        
+        // Password check
         startBtn.addEventListener('click', () => {
             const password = passwordInput.value;
             if (password === "20082010") {
