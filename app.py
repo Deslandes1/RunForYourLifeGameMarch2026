@@ -6,7 +6,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Hide Streamlit's default UI
 hide_streamlit_style = """
     <style>
         #MainMenu {visibility: hidden;}
@@ -38,7 +37,7 @@ GAME_HTML = """
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;  /* changed from center to allow scrolling from top */
             font-family: 'Courier New', 'Poppins', monospace;
             padding: 12px;
         }
@@ -50,6 +49,7 @@ GAME_HTML = """
             gap: 12px;
             width: 100%;
             max-width: 1000px;
+            margin: auto;
         }
 
         canvas {
@@ -63,7 +63,7 @@ GAME_HTML = """
             background: #1f2a2e;
         }
 
-        /* Start screen styles (scrollable) */
+        /* Start screen (scrollable) */
         .start-screen {
             position: relative;
             width: 100%;
@@ -227,6 +227,7 @@ GAME_HTML = """
             flex-direction: column;
             align-items: center;
             width: 100%;
+            margin-bottom: 20px;  /* extra space at bottom */
         }
 
         .info-panel {
@@ -827,31 +828,24 @@ GAME_HTML = """
         }
         
         function logout() {
-            // Stop all sounds
             stopTerrorSoundtrack();
             soundAllowed = false;
-            // Reset game state
             gameActive = false;
             gameWin = false;
             gameOverFlag = false;
-            // Hide game container, show start screen
             gameContainer.style.display = 'none';
             startScreenDiv.style.display = 'flex';
             startScreenDiv.style.opacity = '1';
-            // Clear password field
             passwordInput.value = '';
             passwordError.style.display = 'none';
-            // Reset keys to avoid stuck inputs
             keys.ArrowUp = false;
             keys.ArrowDown = false;
             keys.ArrowLeft = false;
             keys.ArrowRight = false;
             keys.shift = false;
-            // Re‑generate stars for freshness
             generateStars();
         }
         
-        // Touch control simulation
         function simulateKey(key, isDown) {
             if (key === 'Shift') {
                 keys.shift = isDown;
@@ -944,7 +938,6 @@ GAME_HTML = """
             }
         }
         
-        // Password check
         startBtn.addEventListener('click', () => {
             const password = passwordInput.value;
             if (password === "20082010") {
