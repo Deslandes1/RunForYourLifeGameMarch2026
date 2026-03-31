@@ -1138,6 +1138,7 @@ GAME_HTML = """
         // Password check
         startBtn.addEventListener('click', () => {
             const password = passwordInput.value.trim();
+            console.log("Password entered:", password);
             if (password === "20082010") {
                 passwordError.style.display = "none";
                 generateStars();
