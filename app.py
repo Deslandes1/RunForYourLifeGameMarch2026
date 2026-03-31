@@ -1,4 +1,23 @@
-```html
+import streamlit as st
+
+st.set_page_config(
+    page_title="Vilaj De Dye – Escape the Crossfire",
+    page_icon="🏃‍♂️",
+    layout="wide"
+)
+
+# Hide Streamlit's default UI
+hide_streamlit_style = """
+    <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        .stApp { margin-top: -50px; }
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+GAME_HTML = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -793,4 +812,27 @@
 </script>
 </body>
 </html>
-```
+"""
+
+st.markdown(
+    """
+    <div style="display: flex; justify-content: center; margin-top: -20px;">
+        <div style="max-width: 1020px; width: 100%; overflow-x: auto;">
+    """,
+    unsafe_allow_html=True
+)
+
+st.components.v1.html(GAME_HTML, height=680, scrolling=False)
+
+st.markdown("</div></div>", unsafe_allow_html=True)
+
+st.markdown(
+    """
+    ---
+    ### 🎮 Game Controls
+    - **Arrow keys** – move the father (the three sons follow).
+    - **Hold SHIFT** – run faster to dodge bullets.
+    - **Goal** – bring the whole family into the **green Safe Haven** on the right side of the screen.
+    - Avoid bullets fired by bandits and police. One hit means Game Over.
+    """
+)
