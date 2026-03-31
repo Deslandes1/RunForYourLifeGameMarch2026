@@ -431,12 +431,11 @@ GAME_HTML = """
         const passwordInput = document.getElementById('unlockPassword');
         const passwordError = document.getElementById('passwordError');
         const startInfoPanel = document.getElementById('startInfoPanel');
-        const companyInfoPanel = document.getElementById('companyInfoPanel');
         const gameTitleSpan = document.getElementById('gameTitleSpan');
         const safeRefugeSpan = document.getElementById('safeRefugeSpan');
         const controlsHintSpan = document.getElementById('controlsHint');
 
-        // ---------- Language translations (English, Haitian Creole, Spanish, French) ----------
+        // ---------- Language translations ----------
         const translations = {
             en: {
                 startTitle: "🔥 VILAJ DE DYE 🔥",
@@ -520,19 +519,18 @@ GAME_HTML = """
 
             // Start screen texts
             startInfoPanel.innerHTML = `<h2>${t.startTitle}</h2><p><strong>${t.startSub}</strong></p>`;
-            // Company info remains static (business details are intentionally kept in English)
             // Password placeholder
             passwordInput.placeholder = t.passwordPlaceholder;
             passwordError.innerText = t.passwordError;
             startBtn.innerText = t.startButton;
 
-            // Game panel texts
-            gameTitleSpan.innerText = t.gameTitle;
-            safeRefugeSpan.innerText = t.safeRefuge;
-            controlsHintSpan.innerText = t.controlsHint;
-            
-            // Update current status if game is active
+            // Game panel texts (only if game container is visible)
             if (gameContainer.style.display === 'flex') {
+                gameTitleSpan.innerText = t.gameTitle;
+                safeRefugeSpan.innerText = t.safeRefuge;
+                controlsHintSpan.innerText = t.controlsHint;
+                
+                // Update current status based on game state
                 if (gameActive && !gameWin && !gameOverFlag) {
                     statusSpan.innerText = t.statusRunning;
                 } else if (gameWin) {
@@ -549,20 +547,24 @@ GAME_HTML = """
         function initLanguageSelectors() {
             const langBtns = document.querySelectorAll('.lang-btn');
             langBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const lang = btn.getAttribute('data-lang');
-                    if (lang && translations[lang]) {
-                        currentLang = lang;
-                        updateLanguage();
-                        // Highlight active button
-                        langBtns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                    }
-                });
+                btn.removeEventListener('click', handleLangClick); // avoid duplicates
+                btn.addEventListener('click', handleLangClick);
             });
         }
 
-        // ---------- Game constants (unchanged) ----------
+        function handleLangClick(e) {
+            const btn = e.currentTarget;
+            const lang = btn.getAttribute('data-lang');
+            if (lang && translations[lang]) {
+                currentLang = lang;
+                updateLanguage();
+                // Highlight active button in both selectors
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll(`.lang-btn[data-lang="${lang}"]`).forEach(b => b.classList.add('active'));
+            }
+        }
+
+        // ---------- Game constants ----------
         const W = 1000, H = 600;
         const SAFE_ZONE_X = 870;
         const SAFE_ZONE_Y_MIN = 180;
@@ -604,7 +606,7 @@ GAME_HTML = """
         const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, shift: false };
         let currentSpeed = WALK_SPEED;
         
-        // ----- TERROR SOUND (unchanged) -----
+        // ----- TERROR SOUND -----
         let audioCtx = null;
         let terrorLoopSource = null;
         let terrorGain = null;
@@ -692,7 +694,6 @@ GAME_HTML = """
             }
         }
         
-        // ---- reset & gameplay functions (updated to use current language strings) ----
         function fullGameReset() {
             gameActive = true;
             gameWin = false;
@@ -827,7 +828,7 @@ GAME_HTML = """
             stopTerrorSoundtrack();
         }
         
-        // ------ Drawing functions (updated to use current language) ------
+        // Drawing functions (updated to use current language)
         function drawBackgroundGhetto() {
             ctx.fillStyle = "#1f2a2e";
             ctx.fillRect(0,0,W,H);
@@ -853,9 +854,83 @@ GAME_HTML = """
             ctx.fillText(translations[currentLang].graffiti2, 760, 520);
         }
         
-        function drawEnemies() { /* unchanged */ }
-        function drawBullets() { /* unchanged */ }
-        function drawCharacters() { /* unchanged */ }
+        function drawEnemies() {
+            for (let e of enemies) {
+                ctx.shadowBlur = 0;
+                if (e.type === "bandit") {
+                    ctx.fillStyle = "#1b2b1f";
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 14, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.fillStyle = "#bc9a6c";
+                    ctx.fillRect(e.x-8, e.y-4, 16, 6);
+                    ctx.fillStyle = "#7a2e2e";
+                    ctx.beginPath();
+                    ctx.moveTo(e.x+10, e.y-2);
+                    ctx.lineTo(e.x+18, e.y-8);
+                    ctx.lineTo(e.x+14, e.y+2);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = "#2c4763";
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 14, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.fillStyle = "#27466e";
+                    ctx.fillRect(e.x-7, e.y-5, 14, 8);
+                    ctx.fillStyle = "#c97e3a";
+                    ctx.beginPath();
+                    ctx.rect(e.x-4, e.y-12, 8, 6);
+                    ctx.fill();
+                }
+                ctx.fillStyle = "#000000";
+                ctx.beginPath();
+                ctx.arc(e.x-5, e.y-3, 2, 0, Math.PI*2);
+                ctx.arc(e.x+5, e.y-3, 2, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
+        
+        function drawBullets() {
+            for (let b of bullets) {
+                ctx.fillStyle = "#ffaa33";
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius-2, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = "#ff4500";
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius-4, 0, Math.PI*2);
+                ctx.fill();
+            }
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawCharacters() {
+            ctx.shadowBlur = 3;
+            ctx.fillStyle = "#2b5797";
+            ctx.beginPath();
+            ctx.arc(father.x, father.y, FATHER_RADIUS, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#ffdb7e";
+            ctx.beginPath();
+            ctx.arc(father.x-4, father.y-4, 3, 0, Math.PI*2);
+            ctx.arc(father.x+4, father.y-4, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#6b3e1c";
+            ctx.fillRect(father.x-6, father.y+3, 12, 5);
+            const colors = ["#4f7e3e", "#cb7429", "#3f729b"];
+            for (let i=0;i<sons.length;i++) {
+                ctx.fillStyle = colors[i%3];
+                ctx.beginPath();
+                ctx.arc(sons[i].x, sons[i].y, SON_RADIUS, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = "#fce5b4";
+                ctx.beginPath();
+                ctx.arc(sons[i].x-3, sons[i].y-3, 2.2, 0, Math.PI*2);
+                ctx.arc(sons[i].x+3, sons[i].y-3, 2.2, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
         
         function drawSafeZone() {
             ctx.fillStyle = "#2c6e2ccc";
@@ -922,6 +997,10 @@ GAME_HTML = """
             }
             statusSpan.innerText = translations[currentLang].statusRunning;
             statusSpan.style.color = "#f7d44a";
+            // Ensure game panel texts are updated with current language
+            gameTitleSpan.innerText = translations[currentLang].gameTitle;
+            safeRefugeSpan.innerText = translations[currentLang].safeRefuge;
+            controlsHintSpan.innerText = translations[currentLang].controlsHint;
         }
         
         function logout() {
@@ -941,9 +1020,11 @@ GAME_HTML = """
             keys.ArrowRight = false;
             keys.shift = false;
             generateStars();
+            // Re-apply current language to start screen
+            updateLanguage();
         }
         
-        // Touch and keyboard controls (unchanged)
+        // Touch and keyboard controls
         function simulateKey(key, isDown) {
             if (key === 'Shift') {
                 keys.shift = isDown;
@@ -962,7 +1043,6 @@ GAME_HTML = """
             touchButtons.forEach(btn => {
                 const key = btn.getAttribute('data-key');
                 if (!key) return;
-                
                 btn.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     simulateKey(key, true);
