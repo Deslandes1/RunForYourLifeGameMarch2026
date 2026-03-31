@@ -63,7 +63,6 @@ GAME_HTML = """
             background: #1f2a2e;
         }
 
-        /* Start screen (scrollable) */
         .start-screen {
             position: relative;
             width: 100%;
@@ -373,7 +372,6 @@ GAME_HTML = """
             <div id="passwordError" class="error-msg" style="display: none;">Wrong password. Try again.</div>
         </div>
 
-        <!-- LANGUAGE SELECTOR ON START SCREEN -->
         <div class="lang-selector" id="startLangSelector">
             <button class="lang-btn" data-lang="en">🇺🇸 English</button>
             <button class="lang-btn" data-lang="ht">🇭🇹 Kreyòl</button>
@@ -406,7 +404,6 @@ GAME_HTML = """
             <div class="touch-btn run-btn" data-key="Shift">🏃 RUN</div>
         </div>
         <div class="controls-hint" id="controlsHint">🎮 ARROWS = move | SHIFT = RUN | Avoid BULLETS! 🎮</div>
-        <!-- LANGUAGE SELECTOR INSIDE GAME -->
         <div class="lang-selector" id="gameLangSelector">
             <button class="lang-btn" data-lang="en">🇺🇸 English</button>
             <button class="lang-btn" data-lang="ht">🇭🇹 Kreyòl</button>
@@ -547,7 +544,7 @@ GAME_HTML = """
         function initLanguageSelectors() {
             const langBtns = document.querySelectorAll('.lang-btn');
             langBtns.forEach(btn => {
-                btn.removeEventListener('click', handleLangClick); // avoid duplicates
+                btn.removeEventListener('click', handleLangClick);
                 btn.addEventListener('click', handleLangClick);
             });
         }
@@ -1142,7 +1139,7 @@ GAME_HTML = """
         
         // Password check
         startBtn.addEventListener('click', () => {
-            const password = passwordInput.value;
+            const password = passwordInput.value.trim();
             if (password === "20082010") {
                 passwordError.style.display = "none";
                 generateStars();
@@ -1151,9 +1148,10 @@ GAME_HTML = """
                     startScreenDiv.style.display = 'none';
                     gameContainer.style.display = 'flex';
                     launchGame();
-                    if(!animationId) animate();
                     initTouchControls();
-                }, 400);
+                    // Ensure animation is running (it should already be running, but just in case)
+                    if (!animationId) animate();
+                }, 500);
             } else {
                 passwordError.style.display = "block";
                 passwordInput.value = "";
@@ -1189,7 +1187,7 @@ GAME_HTML = """
             if (btn.getAttribute('data-lang') === 'en') btn.classList.add('active');
         });
         updateLanguage(); // apply initial language
-        animate();
+        animate(); // start the animation loop
     })();
 </script>
 </body>
