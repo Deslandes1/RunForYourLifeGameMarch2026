@@ -63,23 +63,23 @@ GAME_HTML = """
             background: #1f2a2e;
         }
 
-        /* Updated start-screen styles */
+        /* Start screen styles (scrollable) */
         .start-screen {
             position: relative;
             width: 100%;
             max-width: 1000px;
-            max-height: 90vh;           /* limit height to viewport */
-            overflow-y: auto;           /* enable scrolling if needed */
+            max-height: 90vh;
+            overflow-y: auto;
             background: radial-gradient(circle at 30% 20%, #0b2b3b, #01050e);
             border-radius: 28px;
             box-shadow: 0 20px 35px rgba(0, 0, 0, 0.6);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* start from top, not center */
+            justify-content: flex-start;
             backdrop-filter: blur(1px);
             transition: opacity 0.4s ease;
-            padding: 20px 20px 40px 20px; /* extra bottom padding */
+            padding: 20px 20px 40px 20px;
             margin: 0 auto;
         }
 
@@ -166,7 +166,6 @@ GAME_HTML = """
             margin-top: 8px;
         }
 
-        /* Ensure the password area is always visible */
         .password-area {
             margin: 15px 0;
             width: 90%;
@@ -176,8 +175,8 @@ GAME_HTML = """
 
         .password-area input {
             width: 100%;
-            padding: 14px;   /* larger touch target */
-            font-size: 18px; /* larger text */
+            padding: 14px;
+            font-size: 18px;
             border-radius: 40px;
             border: 2px solid gold;
             background: rgba(0,0,0,0.7);
@@ -202,14 +201,13 @@ GAME_HTML = """
             border-radius: 20px;
         }
 
-        /* Make start button also larger and easier to tap */
         .start-btn {
             margin-top: 20px;
             background: #d62c1e;
             border: none;
             font-size: clamp(20px, 6vw, 28px);
             font-weight: bold;
-            padding: 14px 30px;   /* larger tap area */
+            padding: 14px 30px;
             border-radius: 60px;
             color: #ffefb9;
             font-family: monospace;
@@ -252,9 +250,9 @@ GAME_HTML = """
             border-radius: 28px;
             font-size: clamp(10px, 3vw, 14px);
             text-align: center;
+            margin-bottom: 15px;
         }
 
-        /* Touch controls container */
         .touch-controls {
             display: flex;
             justify-content: center;
@@ -324,7 +322,7 @@ GAME_HTML = """
 </head>
 <body>
 <div class="game-wrapper">
-    <!-- FIRST PAGE: HAITIAN FLAG + INFO + PASSWORD -->
+    <!-- START SCREEN -->
     <div id="startScreen" class="start-screen">
         <div class="flag-container">
             <div class="haitian-flag"></div>
@@ -362,10 +360,12 @@ GAME_HTML = """
             <span>🔥 VILAJ DE DYE 🔥</span>
             <span>🏠 SAFE REFUGE → right side</span>
             <span id="gameStatusMsg">⚔️ ESCAPE ⚔️</span>
-            <button id="resetGameBtn">RESTART</button>
+            <div style="display: flex; gap: 8px;">
+                <button id="resetGameBtn">RESTART</button>
+                <button id="logoutBtn">LOGOUT</button>
+            </div>
         </div>
         <canvas id="gameCanvas" width="1000" height="600"></canvas>
-        <!-- Touch controls -->
         <div class="touch-controls">
             <div class="touch-btn" data-key="ArrowUp">▲</div>
             <div class="touch-btn" data-key="ArrowLeft">◀</div>
@@ -384,6 +384,7 @@ GAME_HTML = """
         const gameContainer = document.getElementById('gameContainer');
         const startBtn = document.getElementById('startGameBtn');
         const resetBtn = document.getElementById('resetGameBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const statusSpan = document.getElementById('gameStatusMsg');
@@ -654,7 +655,7 @@ GAME_HTML = """
             stopTerrorSoundtrack();
         }
         
-        // ------ Drawing functions (unchanged) ------
+        // Drawing functions (unchanged)
         function drawBackgroundGhetto() {
             ctx.fillStyle = "#1f2a2e";
             ctx.fillRect(0,0,W,H);
@@ -778,7 +779,7 @@ GAME_HTML = """
         }
         
         function gameUpdate() {
-            if (!gameContainer.style.display === 'flex') return;
+            if (gameContainer.style.display !== 'flex') return;
             if (gameActive && !gameWin && !gameOverFlag) {
                 handleMovement();
                 updateSonsPosition(false);
@@ -825,6 +826,31 @@ GAME_HTML = """
             statusSpan.style.color = "#f7d44a";
         }
         
+        function logout() {
+            // Stop all sounds
+            stopTerrorSoundtrack();
+            soundAllowed = false;
+            // Reset game state
+            gameActive = false;
+            gameWin = false;
+            gameOverFlag = false;
+            // Hide game container, show start screen
+            gameContainer.style.display = 'none';
+            startScreenDiv.style.display = 'flex';
+            startScreenDiv.style.opacity = '1';
+            // Clear password field
+            passwordInput.value = '';
+            passwordError.style.display = 'none';
+            // Reset keys to avoid stuck inputs
+            keys.ArrowUp = false;
+            keys.ArrowDown = false;
+            keys.ArrowLeft = false;
+            keys.ArrowRight = false;
+            keys.shift = false;
+            // Re‑generate stars for freshness
+            generateStars();
+        }
+        
         // Touch control simulation
         function simulateKey(key, isDown) {
             if (key === 'Shift') {
@@ -832,7 +858,6 @@ GAME_HTML = """
             } else if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
                 keys[key] = isDown;
             }
-            // Prevent default scrolling on touch devices
             if (isDown) {
                 document.body.style.overflow = 'hidden';
             } else {
@@ -858,7 +883,6 @@ GAME_HTML = """
                     e.preventDefault();
                     simulateKey(key, false);
                 });
-                // Mouse events for debugging on desktop
                 btn.addEventListener('mousedown', (e) => {
                     e.preventDefault();
                     simulateKey(key, true);
@@ -884,7 +908,7 @@ GAME_HTML = """
                     e.preventDefault();
                 }
                 if (e.key === 'r' || e.key === 'R') {
-                    if (!gameActive || gameWin || gameOverFlag) {
+                    if (gameContainer.style.display === 'flex' && (!gameActive || gameWin || gameOverFlag)) {
                         fullGameReset();
                         if(gameWin || gameOverFlag){
                             gameActive = true;
@@ -932,7 +956,7 @@ GAME_HTML = """
                     gameContainer.style.display = 'flex';
                     launchGame();
                     if(!animationId) animate();
-                    initTouchControls(); // ensure touch controls are active after game start
+                    initTouchControls();
                 }, 400);
             } else {
                 passwordError.style.display = "block";
@@ -955,6 +979,10 @@ GAME_HTML = """
                 for(let e of enemies) e.cooldown = 5;
                 updateSonsPosition(true);
             }
+        });
+        
+        logoutBtn.addEventListener('click', () => {
+            logout();
         });
         
         generateStars();
