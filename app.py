@@ -373,6 +373,7 @@ GAME_HTML = """
             <div id="passwordError" class="error-msg" style="display: none;">Wrong password. Try again.</div>
         </div>
 
+        <!-- LANGUAGE SELECTOR ON START SCREEN -->
         <div class="lang-selector" id="startLangSelector">
             <button class="lang-btn" data-lang="en">🇺🇸 English</button>
             <button class="lang-btn" data-lang="ht">🇭🇹 Kreyòl</button>
@@ -405,6 +406,7 @@ GAME_HTML = """
             <div class="touch-btn run-btn" data-key="Shift">🏃 RUN</div>
         </div>
         <div class="controls-hint" id="controlsHint">🎮 ARROWS = move | SHIFT = RUN | Avoid BULLETS! 🎮</div>
+        <!-- LANGUAGE SELECTOR INSIDE GAME -->
         <div class="lang-selector" id="gameLangSelector">
             <button class="lang-btn" data-lang="en">🇺🇸 English</button>
             <button class="lang-btn" data-lang="ht">🇭🇹 Kreyòl</button>
@@ -434,7 +436,7 @@ GAME_HTML = """
         const safeRefugeSpan = document.getElementById('safeRefugeSpan');
         const controlsHintSpan = document.getElementById('controlsHint');
 
-        // ---------- Language translations (added French) ----------
+        // ---------- Language translations (English, Haitian Creole, Spanish, French) ----------
         const translations = {
             en: {
                 startTitle: "🔥 VILAJ DE DYE 🔥",
@@ -518,7 +520,7 @@ GAME_HTML = """
 
             // Start screen texts
             startInfoPanel.innerHTML = `<h2>${t.startTitle}</h2><p><strong>${t.startSub}</strong></p>`;
-            // Company info remains static (it's the same in all languages)
+            // Company info remains static (business details are intentionally kept in English)
             // Password placeholder
             passwordInput.placeholder = t.passwordPlaceholder;
             passwordError.innerText = t.passwordError;
@@ -528,14 +530,7 @@ GAME_HTML = """
             gameTitleSpan.innerText = t.gameTitle;
             safeRefugeSpan.innerText = t.safeRefuge;
             controlsHintSpan.innerText = t.controlsHint;
-            // Status messages (if game is active/win/over, we'll update dynamically in the game loop)
-            // We'll store status strings for later use
-            window.currentStatusStrings = {
-                escape: t.statusEscape,
-                victory: t.statusVictory,
-                gameOver: t.statusGameOver,
-                running: t.statusRunning
-            };
+            
             // Update current status if game is active
             if (gameContainer.style.display === 'flex') {
                 if (gameActive && !gameWin && !gameOverFlag) {
@@ -548,9 +543,6 @@ GAME_HTML = """
                     statusSpan.innerText = t.statusEscape;
                 }
             }
-
-            // Force redraw of canvas to update graffiti and safe zone text
-            // (canvas text is drawn each frame, so we just need to ensure the drawing functions use current language)
         }
 
         // Language selector event handlers
@@ -562,7 +554,7 @@ GAME_HTML = """
                     if (lang && translations[lang]) {
                         currentLang = lang;
                         updateLanguage();
-                        // Highlight active button (optional)
+                        // Highlight active button
                         langBtns.forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
                     }
