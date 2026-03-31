@@ -423,14 +423,14 @@ GAME_HTML = """
         let bullets = [];
         
         let enemies = [
-            { x: 150, y: 110, type: "bandit", cooldown: 0, shootDelay: 55 },
-            { x: 220, y: 500, type: "bandit", cooldown: 0, shootDelay: 60 },
-            { x: 480, y: 80, type: "bandit", cooldown: 0, shootDelay: 50 },
-            { x: 650, y: 540, type: "police", cooldown: 0, shootDelay: 48 },
-            { x: 780, y: 180, type: "police", cooldown: 0, shootDelay: 52 },
-            { x: 830, y: 470, type: "police", cooldown: 0, shootDelay: 58 },
-            { x: 540, y: 380, type: "bandit", cooldown: 0, shootDelay: 45 },
-            { x: 370, y: 520, type: "police", cooldown: 0, shootDelay: 53 }
+            { x: 150, y: 110, type: "bandit", cooldown: 0, shootDelay: 70 },
+            { x: 220, y: 500, type: "bandit", cooldown: 0, shootDelay: 75 },
+            { x: 480, y: 80, type: "bandit", cooldown: 0, shootDelay: 65 },
+            { x: 650, y: 540, type: "police", cooldown: 0, shootDelay: 60 },
+            { x: 780, y: 180, type: "police", cooldown: 0, shootDelay: 68 },
+            { x: 830, y: 470, type: "police", cooldown: 0, shootDelay: 72 },
+            { x: 540, y: 380, type: "bandit", cooldown: 0, shootDelay: 70 },
+            { x: 370, y: 520, type: "police", cooldown: 0, shootDelay: 66 }
         ];
         
         const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, shift: false };
@@ -442,6 +442,12 @@ GAME_HTML = """
         let terrorGain = null;
         let gunshotInterval = null;
         let soundAllowed = false;
+        
+        // ----- Celebration effects -----
+        let celebrationActive = false;
+        let celebrationTimer = null;
+        let balloons = [];
+        let victoryBuzzerPlayed = false;
         
         function initAudio() {
             if (audioCtx) return;
@@ -524,10 +530,84 @@ GAME_HTML = """
             }
         }
         
+        function playVictoryBuzzer() {
+            if (!audioCtx || victoryBuzzerPlayed) return;
+            victoryBuzzerPlayed = true;
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = 880;
+                gain.gain.value = 0.5;
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(now + 1.5);
+                
+                // add a second lower note
+                const osc2 = audioCtx.createOscillator();
+                osc2.type = 'sine';
+                osc2.frequency.value = 440;
+                osc2.connect(gain);
+                osc2.start();
+                osc2.stop(now + 1.5);
+            } catch(e) { console.log("buzzer err", e); }
+        }
+        
+        function startCelebration() {
+            if (celebrationActive) return;
+            celebrationActive = true;
+            victoryBuzzerPlayed = false;
+            playVictoryBuzzer();
+            // Create 50 balloons
+            balloons = [];
+            for (let i = 0; i < 50; i++) {
+                balloons.push({
+                    x: Math.random() * W,
+                    y: H + Math.random() * 100,
+                    radius: 10 + Math.random() * 15,
+                    color: Math.random() > 0.5 ? "#00209f" : "#d21034", // blue or red
+                    speed: 1 + Math.random() * 2,
+                    angle: Math.random() * Math.PI * 2
+                });
+            }
+            if (celebrationTimer) clearTimeout(celebrationTimer);
+            celebrationTimer = setTimeout(() => {
+                celebrationActive = false;
+                balloons = [];
+            }, 5000);
+        }
+        
+        function drawCelebration() {
+            if (!celebrationActive) return;
+            for (let b of balloons) {
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                ctx.fillStyle = b.color;
+                ctx.fill();
+                ctx.fillStyle = "gold";
+                ctx.font = `${b.radius}px monospace`;
+                ctx.fillText("🎈", b.x - b.radius/2, b.y - b.radius/2);
+                // move up
+                b.y -= b.speed;
+                // reset if out of top
+                if (b.y + b.radius < 0) {
+                    b.y = H + b.radius;
+                    b.x = Math.random() * W;
+                }
+            }
+        }
+        
+        // ---- reset & gameplay functions ----
         function fullGameReset() {
             gameActive = true;
             gameWin = false;
             gameOverFlag = false;
+            celebrationActive = false;
+            balloons = [];
+            if (celebrationTimer) clearTimeout(celebrationTimer);
             statusSpan.innerText = "🏃‍♂️ ESCAPE! AVOID BULLETS 🏃‍♂️";
             statusSpan.style.color = "#f7d44a";
             father.x = 90;
@@ -579,10 +659,16 @@ GAME_HTML = """
             return false;
         }
         
+        // Enemies shoot at each other, not at player
         function enemyShoot(enemy) {
             if (!gameActive || gameWin) return;
-            let angle = Math.atan2(father.y - enemy.y, father.x - enemy.x);
-            angle += (Math.random() - 0.5) * 0.45;
+            // Find a random enemy that is not this one
+            const otherEnemies = enemies.filter(e => e !== enemy);
+            if (otherEnemies.length === 0) return;
+            const target = otherEnemies[Math.floor(Math.random() * otherEnemies.length)];
+            // aim at target's position
+            let angle = Math.atan2(target.y - enemy.y, target.x - enemy.x);
+            angle += (Math.random() - 0.5) * 0.3; // slight spread
             const speed = 5.2;
             const vx = Math.cos(angle) * speed;
             const vy = Math.sin(angle) * speed;
@@ -644,6 +730,7 @@ GAME_HTML = """
                 statusSpan.innerText = "🌟 VICTORY! SAFE REFUGE 🌟";
                 statusSpan.style.color = "#adff2f";
                 stopTerrorSoundtrack();
+                startCelebration();
                 return true;
             }
             return false;
@@ -656,9 +743,11 @@ GAME_HTML = """
             statusSpan.innerText = "💀 GAME OVER... Hit by bullet 💀";
             statusSpan.style.color = "#ff5555";
             stopTerrorSoundtrack();
+            celebrationActive = false;
+            if (celebrationTimer) clearTimeout(celebrationTimer);
         }
         
-        // Drawing functions
+        // Drawing functions (unchanged but add celebration draw)
         function drawBackgroundGhetto() {
             ctx.fillStyle = "#1f2a2e";
             ctx.fillRect(0,0,W,H);
@@ -798,6 +887,7 @@ GAME_HTML = """
             drawBullets();
             drawCharacters();
             drawHUD();
+            drawCelebration();
             if(gameActive && !gameWin && !gameOverFlag && Math.random()<0.1){
                 ctx.fillStyle = "#ffaa3344";
                 ctx.fillRect(0,0,W,H);
@@ -835,6 +925,8 @@ GAME_HTML = """
             gameActive = false;
             gameWin = false;
             gameOverFlag = false;
+            celebrationActive = false;
+            if (celebrationTimer) clearTimeout(celebrationTimer);
             gameContainer.style.display = 'none';
             startScreenDiv.style.display = 'flex';
             passwordInput.value = '';
@@ -847,7 +939,7 @@ GAME_HTML = """
             generateStars();
         }
         
-        // Touch and keyboard controls
+        // Touch and keyboard controls (unchanged)
         function simulateKey(key, isDown) {
             if (key === 'Shift') {
                 keys.shift = isDown;
