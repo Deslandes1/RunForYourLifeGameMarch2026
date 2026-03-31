@@ -63,21 +63,23 @@ GAME_HTML = """
             background: #1f2a2e;
         }
 
-        /* Start screen (responsive) */
+        /* Updated start-screen styles */
         .start-screen {
             position: relative;
             width: 100%;
             max-width: 1000px;
+            max-height: 90vh;           /* limit height to viewport */
+            overflow-y: auto;           /* enable scrolling if needed */
             background: radial-gradient(circle at 30% 20%, #0b2b3b, #01050e);
             border-radius: 28px;
             box-shadow: 0 20px 35px rgba(0, 0, 0, 0.6);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* start from top, not center */
             backdrop-filter: blur(1px);
             transition: opacity 0.4s ease;
-            padding: 20px;
+            padding: 20px 20px 40px 20px; /* extra bottom padding */
             margin: 0 auto;
         }
 
@@ -164,17 +166,18 @@ GAME_HTML = """
             margin-top: 8px;
         }
 
+        /* Ensure the password area is always visible */
         .password-area {
             margin: 15px 0;
             width: 90%;
-            max-width: 280px;
+            max-width: 300px;
             text-align: center;
         }
 
         .password-area input {
             width: 100%;
-            padding: 12px;
-            font-size: 16px;
+            padding: 14px;   /* larger touch target */
+            font-size: 18px; /* larger text */
             border-radius: 40px;
             border: 2px solid gold;
             background: rgba(0,0,0,0.7);
@@ -199,13 +202,14 @@ GAME_HTML = """
             border-radius: 20px;
         }
 
+        /* Make start button also larger and easier to tap */
         .start-btn {
             margin-top: 20px;
             background: #d62c1e;
             border: none;
             font-size: clamp(20px, 6vw, 28px);
             font-weight: bold;
-            padding: 12px 24px;
+            padding: 14px 30px;   /* larger tap area */
             border-radius: 60px;
             color: #ffefb9;
             font-family: monospace;
